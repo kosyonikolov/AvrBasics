@@ -15,6 +15,8 @@ int main(void)
     uint8_t dataPacket[DATA_PACKET_LEN];
     uint8_t errorPacket[ERROR_PACKET_LEN];
 
+    int gyro = 600; // About 360 deg/s
+
     // set bytes to initial values
     {
         memset(dataPacket, 0, DATA_PACKET_LEN);
@@ -30,11 +32,9 @@ int main(void)
         dataPacket[OFFSET_PACKET_ID]   = DATA_PACKET_ID;
         errorPacket[OFFSET_PACKET_ID]  = ERROR_PACKET_ID;
 
-        // set right side force reading to zero - no sensor on the right crankarm yet
-        for (int i = 0; i < FORCE_LEN; i++)
-        {
-            dataPacket[OFFSET_FORCE_RIGHT + i] = 0;
-        }
+        dataPacket[OFFSET_GYRO + 0] = gyro >> 8;
+        dataPacket[OFFSET_GYRO + 1] = gyro & 0xFF;
+        dataPacket[OFFSET_FORCE_LEFT + 2] = 23;
     }
 
     // --------------------------------------------------------------
@@ -55,5 +55,7 @@ int main(void)
         dataPacket[OFFSET_TIME]     = packetTime >> 8;
         dataPacket[OFFSET_TIME + 1] = packetTime & 0xFF;
         UsartSend((char*)dataPacket, DATA_PACKET_LEN);
+
+        _delay_ms(1000.0 / 80); // 80 Hz target
     }
 }
